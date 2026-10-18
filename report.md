@@ -1,128 +1,129 @@
-# SCF-VL / CrashInsight — Paper Results Tables
+# SCF-VL / CrashInsight: Experimental Results
 
-**Dataset:** CrashX-1500 (train / val / test). **Backbone:** Qwen2.5-VL-7B-Instruct (QLoRA).  
-**Reported main system:** **SCF-Hybrid** (faithfulness-first decode fusion).  
-**Seed:** 42. Metrics on the **test** split.
+**Dataset:** CrashX-1500 (training, validation, and test splits)  
+**Backbone:** Qwen2.5-VL-7B-Instruct with QLoRA  
+**Primary Configuration:** SCF-Hybrid (faithfulness-first decoding and fusion)  
+**Random Seed:** 42  
+**Evaluation Split:** Test set
 
-> **Venue note (honest):** These results support a strong **workshop / specialized venue** paper (video understanding, explainable multimodal, traffic safety). For a top **A\*** venue (CVPR / ICCV / NeurIPS / ACL), you still need: (i) clear external baselines (prior crash-VLM / video-LLM SOTA), (ii) multi-seed mean±std, (iii) human study or error analysis, and (iv) a sharper novelty claim than decode-time fusion alone. Tables below are publication-ready for the empirical section; A\* needs that extra package.
+## Table 1. Overall Performance Comparison
 
----
-
-## Table 1. Main Results (Overall)
-
-Best value per column in **bold**. SCF-Hybrid is the primary reported system.
+The following table presents the performance of the baseline and proposed system configurations across language generation, temporal localization, and factual consistency metrics. Higher values indicate better performance for all metrics except where otherwise specified.
 
 | Method | BLEU-4 ↑ | METEOR ↑ | BERTScore ↑ | tIoU ↑ | R@0.5 ↑ | Full-NLI ↑ | Full-Ent. ↑ |
-|--------|--------:|---------:|------------:|-------:|--------:|-----------:|------------:|
-| Qwen2.5-VL SFT (plain) | 0.112 | 0.210 | 0.901 | 0.459 | 0.527 | 0.206 | 0.350 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Qwen2.5-VL SFT (baseline) | 0.112 | 0.210 | 0.901 | 0.459 | 0.527 | 0.206 | 0.350 |
 | SCF-VL (v2) | 0.104 | 0.208 | 0.901 | **0.479** | **0.580** | 0.221 | 0.361 |
 | SCF-VL + FactPack (v3) | **0.129** | 0.207 | 0.901 | 0.447 | 0.373 | 0.322 | 0.429 |
 | SCF-Faith | 0.123 | 0.210 | 0.900 | 0.416 | 0.467 | 0.408 | 0.518 |
 | SCF-Distill (BoN) | 0.114 | 0.210 | 0.899 | 0.414 | 0.413 | 0.507 | 0.611 |
-| **SCF-Hybrid (ours)** | 0.125 | **0.213** | 0.901 | **0.479** | **0.580** | **0.559** | **0.639** |
+| SCF-Hybrid | 0.125 | **0.213** | 0.901 | **0.479** | **0.580** | **0.559** | **0.639** |
 
-**Takeaway:** Hybrid matches best temporal localization, keeps caption metrics near the best single model, and yields the largest faithfulness gain (Full-NLI **0.56** vs plain **0.21** / v3 **0.32**).
+**Analysis:** SCF-Hybrid achieves the highest Full-NLI score (0.559) and Full-Entailment score (0.639) among the evaluated configurations. It also matches the highest temporal intersection-over-union (tIoU = 0.479) and temporal recall at an IoU threshold of 0.5 (R@0.5 = 0.580). The SCF-VL + FactPack configuration achieves the highest BLEU-4 score (0.129), whereas SCF-Hybrid achieves the highest METEOR score (0.213). These results indicate differences in lexical similarity, temporal localization, and factual consistency across the evaluated configurations.
 
----
+## Table 2. Explanation Generation Quality
 
-## Table 2. Explanation Quality (Caption Metrics)
+Caption generation quality is evaluated using BLEU, ROUGE-L, METEOR, and BERTScore.
 
 | Method | BLEU-1 | BLEU-2 | BLEU-3 | BLEU-4 | ROUGE-L | METEOR | BERTScore |
-|--------|-------:|-------:|-------:|-------:|--------:|-------:|----------:|
-| Qwen2.5-VL SFT (plain) | 0.406 | 0.260 | 0.171 | 0.112 | 0.303 | 0.210 | 0.901 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Qwen2.5-VL SFT (baseline) | 0.406 | 0.260 | 0.171 | 0.112 | 0.303 | 0.210 | 0.901 |
 | SCF-VL (v2) | 0.402 | 0.257 | 0.165 | 0.104 | 0.298 | 0.208 | 0.901 |
 | SCF-VL + FactPack (v3) | 0.419 | **0.281** | **0.191** | **0.129** | **0.320** | 0.207 | 0.901 |
 | SCF-Faith | 0.426 | 0.280 | 0.185 | 0.123 | 0.313 | 0.210 | 0.900 |
 | SCF-Distill (BoN) | 0.410 | 0.263 | 0.174 | 0.114 | 0.295 | 0.210 | 0.899 |
-| **SCF-Hybrid (ours)** | **0.427** | 0.281 | 0.188 | 0.125 | 0.313 | **0.213** | 0.901 |
+| SCF-Hybrid | **0.427** | 0.281 | 0.188 | 0.125 | 0.313 | **0.213** | 0.901 |
 
----
+**Analysis:** SCF-Hybrid obtains the highest BLEU-1 (0.427) and METEOR (0.213) scores. SCF-VL + FactPack achieves the highest BLEU-3 (0.191), BLEU-4 (0.129), and ROUGE-L (0.320) scores. BERTScore remains approximately constant across all configurations, ranging from 0.899 to 0.901. This indicates limited variation in embedding-based semantic similarity, despite differences in lexical overlap and other evaluation measures.
 
-## Table 3. Temporal Localization
+## Table 3. Temporal Localization Performance
 
-| Method | text tIoU ↑ | text R@0.5 ↑ | head tIoU ↑ | head R@0.5 ↑ |
-|--------|------------:|-------------:|------------:|-------------:|
-| Qwen2.5-VL SFT (plain) | 0.459 | 0.527 | — | — |
+Temporal localization is evaluated using temporal intersection-over-union (tIoU) and recall at an IoU threshold of 0.5 (R@0.5). Text-based localization and head-based localization are reported separately.
+
+| Method | Text tIoU ↑ | Text R@0.5 ↑ | Head tIoU ↑ | Head R@0.5 ↑ |
+|---|---:|---:|---:|---:|
+| Qwen2.5-VL SFT (baseline) | 0.459 | 0.527 | — | — |
 | SCF-VL (v2) | **0.479** | **0.580** | 0.342 | 0.300 |
 | SCF-VL + FactPack (v3) | 0.447 | 0.373 | **0.443** | 0.367 |
 | SCF-Faith | 0.416 | 0.467 | 0.416 | **0.467** |
 | SCF-Distill (BoN) | 0.414 | 0.413 | 0.414 | 0.413 |
-| **SCF-Hybrid (ours)** | **0.479** | **0.580** | 0.342† | 0.300† |
+| SCF-Hybrid | **0.479** | **0.580** | 0.342* | 0.300* |
 
-† Hybrid uses v2 timestamps in the decoded text; head metrics inherit the v2 temporal head.
+*The SCF-Hybrid configuration uses the temporal timestamps generated by SCF-VL (v2). Consequently, its text-based localization metrics match those of v2, while the head-based metrics are inherited from the corresponding temporal head.*
 
----
+**Analysis:** SCF-VL (v2) achieves the highest text-based tIoU (0.479) and R@0.5 (0.580), with the same values retained by SCF-Hybrid. SCF-VL + FactPack achieves the highest head-based tIoU (0.443), while SCF-Faith achieves the highest head-based R@0.5 (0.467). The results show that temporal localization performance varies across model configurations and localization pathways.
 
-## Table 4. Faithfulness (NLI)
+## Table 4. Factual Consistency and NLI-Based Evaluation
 
-Premise = GT forensic facts (+ explanation for Full-NLI). Higher entailment / score is better; lower contradiction is better.
+Natural language inference (NLI) metrics are used to assess the consistency between generated outputs and ground-truth forensic facts. Higher entailment and NLI scores indicate better consistency, whereas lower contradiction scores indicate fewer conflicts.
 
 | Method | NLI-Ent. ↑ | NLI-Con. ↓ | NLI-Score ↑ | Full-NLI-Ent. ↑ | Full-NLI ↑ |
-|--------|-----------:|-----------:|------------:|----------------:|-----------:|
-| Qwen2.5-VL SFT (plain) | 0.158 | 0.165 | −0.007 | 0.350 | 0.206 |
+|---|---:|---:|---:|---:|---:|
+| Qwen2.5-VL SFT (baseline) | 0.158 | 0.165 | −0.007 | 0.350 | 0.206 |
 | SCF-VL (v2) | 0.182 | 0.187 | −0.006 | 0.361 | 0.221 |
 | SCF-VL + FactPack (v3) | 0.306 | 0.144 | 0.162 | 0.429 | 0.322 |
 | SCF-Faith | 0.368 | 0.165 | 0.203 | 0.518 | 0.408 |
 | SCF-Distill (BoN) | 0.427 | 0.184 | 0.243 | 0.611 | 0.507 |
-| **SCF-Hybrid (ours)** | **0.475** | **0.141** | **0.334** | **0.639** | **0.559** |
+| SCF-Hybrid | **0.475** | **0.141** | **0.334** | **0.639** | **0.559** |
 
-**Relative gain (Hybrid vs plain):** Full-NLI **+171%** (0.206 → 0.559).  
-**Relative gain (Hybrid vs FactPack v3):** Full-NLI **+74%** (0.322 → 0.559).
+**Analysis:** SCF-Hybrid achieves the highest NLI entailment (0.475), NLI score (0.334), Full-NLI entailment (0.639), and Full-NLI score (0.559). It also obtains the lowest NLI contradiction score (0.141) among the evaluated configurations.
 
----
+Relative to the baseline, the Full-NLI score increases from 0.206 to 0.559, corresponding to an absolute improvement of 0.353 and a relative increase of approximately 171.4%. Compared with SCF-VL + FactPack, the score increases from 0.322 to 0.559, corresponding to an absolute improvement of 0.237 and a relative increase of approximately 73.6%.
 
-## Table 5. Ablation of SCF Components
+These findings indicate improved NLI-based factual consistency under the evaluated SCF-Hybrid configuration. The results reflect the selected evaluation metrics and do not, by themselves, establish complete factual correctness.
 
-All rows use the SCF-VL training setup with the named module removed (QLoRA 7B). NLI not re-scored for all ablations.
+## Table 5. Ablation Study of SCF Components
 
-| Variant | BLEU-4 ↑ | METEOR ↑ | BERTScore ↑ | tIoU ↑ | R@0.5 ↑ | Sev. Acc. (text) |
-|---------|--------:|---------:|------------:|-------:|--------:|-----------------:|
-| Full SCF-VL (v2 ref.) | 0.104 | 0.208 | 0.901 | **0.479** | **0.580** | 0.453 |
-| w/o phase head | 0.105 | 0.208 | 0.900 | 0.416 | 0.487 | 0.453 |
-| w/o gate | 0.101 | 0.209 | 0.899 | 0.394 | 0.453 | **0.493** |
-| w/o causal head | 0.113 | 0.203 | 0.900 | 0.431 | 0.500 | 0.467 |
-| w/o SCF aux (LoRA-only) | 0.111 | **0.212** | 0.901 | 0.434 | 0.500 | 0.453 |
+The ablation study evaluates the contribution of individual SCF components under the QLoRA-based 7B training configuration. Each variant removes the specified component while retaining the remaining configuration. NLI metrics were not recalculated for every ablation.
 
-**Takeaway:** Removing the **gate** or **phase** head hurts temporal localization the most; aux-only removal still underperforms full SCF on tIoU.
+| Variant | BLEU-4 ↑ | METEOR ↑ | BERTScore ↑ | tIoU ↑ | R@0.5 ↑ | Severity Accuracy (Text) ↑ |
+|---|---:|---:|---:|---:|---:|---:|
+| Full SCF-VL (v2 reference) | 0.104 | 0.208 | 0.901 | **0.479** | **0.580** | 0.453 |
+| Without phase head | 0.105 | 0.208 | 0.900 | 0.416 | 0.487 | 0.453 |
+| Without gate | 0.101 | 0.209 | 0.899 | 0.394 | 0.453 | **0.493** |
+| Without causal head | 0.113 | 0.203 | 0.900 | 0.431 | 0.500 | 0.467 |
+| Without SCF auxiliary component (LoRA-only) | 0.111 | **0.212** | 0.901 | 0.434 | 0.500 | 0.453 |
 
----
+**Analysis:** Removing the phase head reduces tIoU from 0.479 to 0.416 and R@0.5 from 0.580 to 0.487. Removing the gate reduces tIoU to 0.394, the lowest value among the reported ablation variants. Removing the SCF auxiliary component also reduces temporal localization performance, with tIoU decreasing to 0.434. The highest severity accuracy (0.493) is observed in the variant without the gate, indicating that component removal can produce different effects across evaluation metrics.
 
-## Optional Table 6. Design Variants (for appendix)
+Overall, the ablation results show that the evaluated SCF components contribute differently to temporal localization, severity classification, and language generation quality.
 
-Two decode policies on the same checkpoints (no extra training):
+## Table 6. Decoding Strategy Comparison
 
-| Decode policy | BLEU-4 | METEOR | tIoU | Full-NLI | Note |
-|---------------|-------:|-------:|-----:|---------:|------|
-| Lexical-balanced (m12f) | **0.129** | 0.211 | 0.479 | 0.436 | Prioritizes BLEU ≈ v3 |
-| **Faithfulness-first (Hybrid, main)** | 0.125 | **0.213** | 0.479 | **0.559** | Prioritizes NLI (reported) |
+Two decoding strategies are evaluated using the same model checkpoints, without additional training.
 
----
+| Decoding Strategy | BLEU-4 ↑ | METEOR ↑ | tIoU ↑ | Full-NLI ↑ |
+|---|---:|---:|---:|---:|
+| Lexical-balanced (m12f) | **0.129** | 0.211 | 0.479 | 0.436 |
+| Faithfulness-first (SCF-Hybrid) | 0.125 | **0.213** | 0.479 | **0.559** |
 
-## Method name mapping (for camera-ready consistency)
+**Analysis:** The lexical-balanced strategy achieves a higher BLEU-4 score (0.129 versus 0.125), whereas the faithfulness-first strategy achieves higher METEOR (0.213 versus 0.211) and Full-NLI (0.559 versus 0.436). Both strategies produce the same tIoU value of 0.479. This comparison illustrates the effect of decoding policy on lexical similarity and NLI-based consistency while preserving the reported temporal localization performance.
 
-| Paper name | Checkpoint / run id |
-|------------|---------------------|
-| Qwen2.5-VL SFT (plain) | `scf_vl_plain_s42` |
+## Model Configuration Mapping
+
+| Method | Checkpoint / Run ID |
+|---|---|
+| Qwen2.5-VL SFT (baseline) | `scf_vl_plain_s42` |
 | SCF-VL (v2) | `scf_vl_v2_s42` |
 | SCF-VL + FactPack (v3) | `scf_vl_v3_s42` |
 | SCF-Faith | `scf_faith_s42` |
 | SCF-Distill (BoN) | `scf_distill_s42` |
-| **SCF-Hybrid (ours)** | `scf_hybrid_s42` (= faithfulness-first / bal) |
+| SCF-Hybrid | `scf_hybrid_s42` |
 
----
+## Suggested Figure Captions
 
-## Suggested figure captions (short)
+**Figure 1. System Architecture.** Overview of the SCF-VL pipeline, including video input, severity, impact and phase prediction heads, FactPack construction, explanation generation, and NLI-based reranking and hybrid assembly.
 
-- **Fig. 1:** Pipeline — video → SCF heads (severity / impact / phase) → FactPack → explanation → NLI rerank / hybrid assemble.  
-- **Fig. 2:** Bar chart of Full-NLI vs BLEU-4 (shows faithfulness–lexical tradeoff and Hybrid Pareto position).  
-- **Fig. 3:** Qualitative examples (correct timing + faithful cause vs plain hallucination).
+**Figure 2. Explanation Quality and Factual Consistency.** Comparison of Full-NLI and BLEU-4 scores across model configurations, illustrating differences between lexical similarity and NLI-based consistency.
 
----
+**Figure 3. Qualitative Evaluation.** Representative examples comparing predicted temporal intervals and generated crash explanations against reference annotations, including cases of accurate localization, factually consistent explanations, and incorrect generated details.
 
-## What still strengthens an A\* submission
+## Summary of Experimental Findings
 
-1. Compare against published CrashX / traffic-VLM baselines (not only your ablations).  
-2. Report **3 seeds** (mean ± std) for Hybrid and v3.  
-3. Human rating: faithfulness / usefulness (20–50 videos).  
-4. Limit decode-fusion as a *system* contribution; keep SCF architecture + BoN distill as the learning contribution.  
-5. Fix causal-head accuracy (currently ~0 in several runs) or drop it from claims.
+1. **Factual consistency:** SCF-Hybrid achieves a Full-NLI score of 0.559 and a Full-Entailment score of 0.639, the highest reported values among the evaluated configurations.
+2. **Temporal localization:** SCF-Hybrid matches SCF-VL (v2), achieving tIoU of 0.479 and R@0.5 of 0.580.
+3. **Explanation quality:** SCF-Hybrid achieves BLEU-1 of 0.427 and METEOR of 0.213, while SCF-VL + FactPack achieves the highest BLEU-4 score of 0.129.
+4. **Component analysis:** The ablation results indicate that the gate and phase head are associated with differences in temporal localization performance.
+5. **Decoding strategy:** The faithfulness-first strategy achieves a higher Full-NLI score than the lexical-balanced strategy, while both retain the same reported tIoU.
+
+The reported results provide a comparative evaluation of SCF-VL configurations across explanation generation, temporal localization, and NLI-based factual consistency on the CrashX-1500 test split. All reported values should be interpreted in accordance with the specified experimental setup and evaluation procedures.
